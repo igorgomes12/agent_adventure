@@ -1,0 +1,269 @@
+###
+# Exemplos de Requisições HTTP para Vertex AI Agent Tools
+# Use com extensões como REST Client (VS Code) ou Postman
+###
+
+@baseUrl = http://localhost:8002
+
+### 1. Health Check
+GET {{baseUrl}}/health
+
+### 2. Obter Definições de Ferramentas
+GET {{baseUrl}}/vertex-agent/tools
+
+### 3. Listar Flows Disponíveis
+GET {{baseUrl}}/flows
+
+### 4. Listar Tabelas de um Flow
+GET {{baseUrl}}/flows/adventureworks_lt/tables
+
+### 5. Buscar Catálogo de Tabelas (Ferramenta 1)
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "buscar_catalogo_tabelas",
+  "parameters": {
+    "flow_id": "adventureworks_lt"
+  }
+}
+
+### 6. Validar Intent - Exemplo Simples (Ferramenta 2)
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "ProductCategoryID",
+        "operator": "=",
+        "value": 5,
+        "nl_term": "Mountain Bikes"
+      }
+    ],
+    "select_columns": [],
+    "order_by": [],
+    "limit": 10
+  }
+}
+
+### 7. Validar Intent - Com Select Columns
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "ProductCategoryID",
+        "operator": "=",
+        "value": 5,
+        "nl_term": "Mountain Bikes"
+      }
+    ],
+    "select_columns": ["ProductID", "Name", "ListPrice"],
+    "order_by": [
+      {
+        "column": "ListPrice",
+        "direction": "DESC"
+      }
+    ],
+    "limit": 10
+  }
+}
+
+### 8. Validar Intent - Filtro Numérico
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "ListPrice",
+        "operator": ">",
+        "value": 1000,
+        "nl_term": "preço acima de 1000"
+      }
+    ],
+    "select_columns": ["ProductID", "Name", "ListPrice"],
+    "order_by": [
+      {
+        "column": "ListPrice",
+        "direction": "DESC"
+      }
+    ],
+    "limit": 20
+  }
+}
+
+### 9. Validar Intent - Múltiplos Filtros
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "ProductCategoryID",
+        "operator": "=",
+        "value": 6,
+        "nl_term": "Road Bikes"
+      },
+      {
+        "column": "ListPrice",
+        "operator": ">=",
+        "value": 500,
+        "nl_term": "preço mínimo 500"
+      },
+      {
+        "column": "ListPrice",
+        "operator": "<=",
+        "value": 2000,
+        "nl_term": "preço máximo 2000"
+      }
+    ],
+    "select_columns": ["ProductID", "Name", "ListPrice", "Color"],
+    "order_by": [
+      {
+        "column": "Name",
+        "direction": "ASC"
+      }
+    ],
+    "limit": 50
+  }
+}
+
+### 10. Validar Intent - Filtro LIKE
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "Name",
+        "operator": "LIKE",
+        "value": "%Mountain%",
+        "nl_term": "nome contém Mountain"
+      }
+    ],
+    "select_columns": ["ProductID", "Name"],
+    "order_by": [],
+    "limit": 10
+  }
+}
+
+### 11. Validar Intent - Filtro IN
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "Product",
+    "filters": [
+      {
+        "column": "Color",
+        "operator": "IN",
+        "value": ["Red", "Blue", "Black"],
+        "nl_term": "cores vermelho, azul ou preto"
+      }
+    ],
+    "select_columns": ["ProductID", "Name", "Color"],
+    "order_by": [
+      {
+        "column": "Color",
+        "direction": "ASC"
+      }
+    ],
+    "limit": 30
+  }
+}
+
+### 12. Teste de Erro - Ferramenta Inexistente
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "ferramenta_inexistente",
+  "parameters": {}
+}
+
+### 13. Teste de Erro - Flow Inexistente
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "buscar_catalogo_tabelas",
+  "parameters": {
+    "flow_id": "flow_inexistente"
+  }
+}
+
+### 14. Teste de Erro - Tabela Inexistente
+POST {{baseUrl}}/vertex-agent/tool
+Content-Type: application/json
+
+{
+  "tool_name": "validar_e_formatar_intent",
+  "parameters": {
+    "flow_id": "adventureworks_lt",
+    "table_name": "TabelaInexistente",
+    "filters": [],
+    "select_columns": [],
+    "order_by": [],
+    "limit": 10
+  }
+}
+
+### 15. Endpoint Original - Query (para comparação)
+POST {{baseUrl}}/query
+Content-Type: application/json
+
+{
+  "prompt": "liste todos os produtos da categoria Mountain Bikes",
+  "flow_id": "adventureworks_lt",
+  "include_intent": false
+}
+
+###
+# EXEMPLOS PARA POWERSHELL
+###
+
+# Buscar Catálogo
+# Invoke-RestMethod -Uri "http://localhost:8002/vertex-agent/tool" -Method POST -ContentType "application/json" -Body '{"tool_name":"buscar_catalogo_tabelas","parameters":{"flow_id":"adventureworks_lt"}}'
+
+# Validar Intent
+# Invoke-RestMethod -Uri "http://localhost:8002/vertex-agent/tool" -Method POST -ContentType "application/json" -Body '{"tool_name":"validar_e_formatar_intent","parameters":{"flow_id":"adventureworks_lt","table_name":"Product","filters":[{"column":"ProductCategoryID","operator":"=","value":5}],"select_columns":[],"order_by":[],"limit":10}}'
+
+###
+# EXEMPLOS PARA CURL (BASH)
+###
+
+# Buscar Catálogo
+# curl -X POST http://localhost:8002/vertex-agent/tool \
+#   -H "Content-Type: application/json" \
+#   -d '{"tool_name":"buscar_catalogo_tabelas","parameters":{"flow_id":"adventureworks_lt"}}'
+
+# Validar Intent
+# curl -X POST http://localhost:8002/vertex-agent/tool \
+#   -H "Content-Type: application/json" \
+#   -d '{"tool_name":"validar_e_formatar_intent","parameters":{"flow_id":"adventureworks_lt","table_name":"Product","filters":[{"column":"ProductCategoryID","operator":"=","value":5}],"select_columns":[],"order_by":[],"limit":10}}'
